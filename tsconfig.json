@@ -1,0 +1,91 @@
+//! This config is used by the editor and type checking, but does not make the build
+{
+	"compilerOptions": {
+		// -----------------------------
+		// ECMAScript Target & Module
+		// -----------------------------
+		"target": "ES2022",
+		// Modern JS, can be changed to ES6 for better compatibility
+		"module": "ESNext",	//"ES6"
+		// Defines the module code generation method.
+		// "esnext" allows using top-level await
+		"moduleResolution": "bundler", //"node", "node16"
+		// How TypeScript looks up modules.
+		"types": [
+			"node"
+		],
+		//! Explicitly loads ONLY the listed @types packages.
+		// Remove the line (or leave it empty: `"types": []`) if you want tsc to auto-load
+		// every @types/* package that appears in node_modules (default behaviour).
+		// Keeping it is safe for small projects, but in monorepos / large codebases
+		// it can hide missing @types packages (jest, mdx, etc.).
+		// Standard module resolution for libraries
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		// standard JS libraries and DOM
+
+		// -----------------------------
+		// Type Checking
+		// -----------------------------
+		"strict": true,
+		// all strict checks
+		"noImplicitAny": true,
+		// Disallows using variables with an implicit `any` type
+		"strictNullChecks": true,
+		// Makes `null` and `undefined` distinct types (a key safety measure)
+		"strictBindCallApply": true,
+		//Checks correctness of `bind`, `call`, and `apply` method arguments
+		"strictFunctionTypes": true,
+		//Ensures function types are checked for compatibility strictly
+		"noImplicitThis": true,
+		// Ensures `this` is typed explicitly in functions.
+		//It improves security when working with classes and object methods
+		"alwaysStrict": true,
+		// Forces `"use strict"` mode in emitted JavaScript. This is more of a declarative safety net than a necessity,
+		// especially if the project is entirely in TypeScript and uses standard ES module syntax.
+		//"noUncheckedIndexedAccess": true,
+		// Forces checking index access safety: `arr[i]` may be `undefined`.
+		// catches the error “Cannot read property of undefined” already at the compilation stage
+		//"noPropertyAccessFromIndexSignature": true,
+		// Prevents accessing undeclared properties when using index signatures.
+		// Will force writing data["userId"] instead of data.userId
+		"noFallthroughCasesInSwitch": true,
+		// Prevents unintended fallthrough in `switch` statements.
+		//"exactOptionalPropertyTypes": true,
+		// Makes optional property types behave strictly (X | undefined instead of optional).
+		// The option helps to accurately distinguish between "the property is missing"
+		// and "the property is present, but equal to undefined"
+		"noImplicitOverride": true,
+		// Requires explicit `override` keyword for overridden class methods.
+		// protection against accidental method overriding in classes.
+
+		"esModuleInterop": true,
+		// Compatibility with CommonJS
+		"allowSyntheticDefaultImports": true,
+		// Lets you use `import x from 'y'` even if the module uses `module.exports = ...`.
+		// Keep it `true` for legacy CommonJS deps; set to `false` if you migrate to `verbatimModuleSyntax`
+		// and want stricter ESM-only imports (`import * as pkg` instead).
+		"isolatedModules": true,
+		// Ensures each file can be safely transpiled independently
+		"skipLibCheck": true,
+		// Skipping third-party type checking
+		"verbatimModuleSyntax": true,
+		// Ensures import/export statements remain untouched — aligns with ESM standards.
+
+		// -----------------------------
+		// JS Support
+		// -----------------------------
+		"allowJs": false,
+		// only TS-files
+		"noEmit": true,
+		//to output compiled .js files... will be emitted in tsconfig.build.json
+	},
+
+	// -----------------------------
+	// Files & Include/Exclude
+	// -----------------------------
+	"include": ["src/**/*.ts", "src/**/*.d.ts"],
+	// only source ts files
+	"exclude": ["node_modules", "scripts", "tests", "dist"]
+	// ignored folders
+}
+
