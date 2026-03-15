@@ -5,11 +5,15 @@ import type { TEventMap, ObserveIntersectionOptions } from '../../types';
  * @param param - css rule
  * @param value - the value of the css rule
  */
-export declare function isStyleSupported(element: HTMLElement, param: string, value: string): boolean;
+export declare function isStyleSupported(
+  element: HTMLElement,
+  param: string,
+  value: string,
+): boolean;
 type TMigrateElementParams = {
-    target: HTMLElement;
-    parentFrom: HTMLElement;
-    parentTo: HTMLElement;
+  target: HTMLElement;
+  parentFrom: HTMLElement;
+  parentTo: HTMLElement;
 };
 /**
  * it migrates the given HTML Element to another HTML Parent
@@ -17,7 +21,11 @@ type TMigrateElementParams = {
  * @param parentFrom - the current HTML parent
  * @param parentTo - the target HTML parent to migrate to
  */
-export declare function migrateElement({ target, parentFrom, parentTo, }: TMigrateElementParams): void;
+export declare function migrateElement({
+  target,
+  parentFrom,
+  parentTo,
+}: TMigrateElementParams): void;
 /**
  * It creates a throttled (locked) event listener that ensures the provided callback is called
  * only after a specified delay, regardless of how frequently the event is triggered.
@@ -40,7 +48,14 @@ export declare function migrateElement({ target, parentFrom, parentTo, }: TMigra
  * // To remove the listener:
  * removeClickListener();
  */
-export declare function throttledEventListener<T extends HTMLElement | Window | Document, K extends keyof TEventMap<T>>(event: K, listenerOwner: T, delay?: number): <P extends unknown[]>(cb: (...params: P) => void, params?: P) => () => void;
+export declare function throttledEventListener<
+  T extends HTMLElement | Window | Document,
+  K extends keyof TEventMap<T>,
+>(
+  event: K,
+  listenerOwner: T,
+  delay?: number,
+): <P extends unknown[]>(cb: (...params: P) => void, params?: P) => () => void;
 /**
  * Toggles a CSS class on a target element when a trigger element
  * crosses the top boundary of the viewport.
@@ -56,7 +71,13 @@ export declare function throttledEventListener<T extends HTMLElement | Window | 
  *
  * @returns A cleanup function that disconnects the observer.
  */
-export declare function toggleClassOnIntersection(targetElement: HTMLElement, triggerElement: HTMLElement, activeClass: string, root?: Element | null, rootMargin?: string): () => void;
+export declare function toggleClassOnIntersection(
+  targetElement: HTMLElement,
+  triggerElement: HTMLElement,
+  activeClass: string,
+  root?: Element | null,
+  rootMargin?: string,
+): () => void;
 /**
  * Observes visibility changes of a DOM element using IntersectionObserver.
  *
@@ -89,7 +110,10 @@ export declare function toggleClassOnIntersection(targetElement: HTMLElement, tr
  *   onEnter: () => header.classList.remove("scrolled")
  * });
  */
-export declare function observeIntersection(targetElement: HTMLElement, options?: ObserveIntersectionOptions): () => void;
+export declare function observeIntersection(
+  targetElement: HTMLElement,
+  options?: ObserveIntersectionOptions,
+): () => void;
 /**
  * Observes one or multiple elements using shared IntersectionObserver instances.
  *
@@ -265,6 +289,9 @@ export declare function observeIntersection(targetElement: HTMLElement, options?
  *   }
  * });
  */
-export declare function observeIntersections(elements: HTMLElement | HTMLElement[], options: ObserveIntersectionOptions): (() => void)[];
+export declare function observeIntersections(
+  elements: HTMLElement | HTMLElement[],
+  options: ObserveIntersectionOptions,
+): (() => void)[];
 export {};
 //# sourceMappingURL=index.d.ts.map

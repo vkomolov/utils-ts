@@ -46,10 +46,7 @@ export default [
       /* TypeScript */
       ...tsPlugin.configs.recommended.rules,
 
-      '@typescript-eslint/consistent-type-imports': [
-        'warn',
-        { prefer: 'type-imports' },
-      ],
+      '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
 
       '@typescript-eslint/no-unused-vars': 'off',
 
@@ -62,9 +59,9 @@ export default [
       'import/order': [
         'warn',
         {
-          groups: ['builtin','external','internal',['parent','sibling','index']],
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
           'newlines-between': 'always',
-          alphabetize: { order:'asc', caseInsensitive:true },
+          alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
 
@@ -72,7 +69,12 @@ export default [
       'unused-imports/no-unused-imports': 'warn',
       'unused-imports/no-unused-vars': [
         'warn',
-        { vars:'all', varsIgnorePattern:'^_', args:'after-used', argsIgnorePattern:'^_' },
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
       ],
 
       /* Quality */

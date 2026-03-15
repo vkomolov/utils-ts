@@ -1,5 +1,5 @@
 export function isSafeObject(value) {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 /**
  * Creates a shallow copy of an object with specific keys removed.
@@ -20,10 +20,10 @@ export function isSafeObject(value) {
  * @returns A new object with the specified keys removed.
  */
 export function omit(obj, keys) {
-    const clone = { ...obj };
-    for (const key of keys) {
-        delete clone[key];
-    }
-    return clone;
+  const clone = { ...obj };
+  for (const key of keys) {
+    delete clone[key];
+  }
+  return clone;
 }
 //# sourceMappingURL=index.js.map

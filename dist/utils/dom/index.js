@@ -1,4 +1,9 @@
-import { createObserver, createObserverKey, observerCache, registerElement, } from '../../helpers';
+import {
+  createObserver,
+  createObserverKey,
+  observerCache,
+  registerElement,
+} from '../../helpers';
 /**
  * It checks whether the given style rule is supported for the given HTML Element
  * @param element - target HTML Element
@@ -6,7 +11,7 @@ import { createObserver, createObserverKey, observerCache, registerElement, } fr
  * @param value - the value of the css rule
  */
 export function isStyleSupported(element, param, value) {
-    return param in element.style && CSS.supports(param, value);
+  return param in element.style && CSS.supports(param, value);
 }
 /**
  * it migrates the given HTML Element to another HTML Parent
@@ -14,13 +19,12 @@ export function isStyleSupported(element, param, value) {
  * @param parentFrom - the current HTML parent
  * @param parentTo - the target HTML parent to migrate to
  */
-export function migrateElement({ target, parentFrom, parentTo, }) {
-    if (target.isConnected) {
-        (target.parentElement === parentFrom ? parentTo : parentFrom).appendChild(target);
-    }
-    else {
-        console.warn(`[migrateElement]: target: ${target} in not in DOM...`);
-    }
+export function migrateElement({ target, parentFrom, parentTo }) {
+  if (target.isConnected) {
+    (target.parentElement === parentFrom ? parentTo : parentFrom).appendChild(target);
+  } else {
+    console.warn(`[migrateElement]: target: ${target} in not in DOM...`);
+  }
 }
 /**
  * It creates a throttled (locked) event listener that ensures the provided callback is called
@@ -45,26 +49,27 @@ export function migrateElement({ target, parentFrom, parentTo, }) {
  * removeClickListener();
  */
 export function throttledEventListener(event, listenerOwner, delay = 300) {
-    if (listenerOwner instanceof HTMLElement && !listenerOwner.isConnected) {
-        throw new Error('[throttledEventListener]: Provided listenerOwner is not a valid DOM element...');
-    }
-    let isLocked = false;
-    return (cb, params) => {
-        const args = (params ?? []);
-        const handler = () => {
-            if (isLocked)
-                return;
-            isLocked = true;
-            setTimeout(() => {
-                cb(...args);
-                isLocked = false;
-            }, delay);
-        };
-        listenerOwner.addEventListener(event, handler);
-        return () => {
-            listenerOwner.removeEventListener(event, handler);
-        };
+  if (listenerOwner instanceof HTMLElement && !listenerOwner.isConnected) {
+    throw new Error(
+      '[throttledEventListener]: Provided listenerOwner is not a valid DOM element...',
+    );
+  }
+  let isLocked = false;
+  return (cb, params) => {
+    const args = params ?? [];
+    const handler = () => {
+      if (isLocked) return;
+      isLocked = true;
+      setTimeout(() => {
+        cb(...args);
+        isLocked = false;
+      }, delay);
     };
+    listenerOwner.addEventListener(event, handler);
+    return () => {
+      listenerOwner.removeEventListener(event, handler);
+    };
+  };
 }
 /**
  * Toggles a CSS class on a target element when a trigger element
@@ -81,33 +86,44 @@ export function throttledEventListener(event, listenerOwner, delay = 300) {
  *
  * @returns A cleanup function that disconnects the observer.
  */
-export function toggleClassOnIntersection(targetElement, triggerElement, activeClass, root = null, rootMargin = '-1px 0px 0px 0px') {
-    if (!targetElement.isConnected || !triggerElement.isConnected) {
-        throw new Error('[toggleClassOnIntersection]: targetElement or triggerElement is not connected to the DOM.');
-    }
-    let isClassActive = false;
-    const observer = new IntersectionObserver(([entry]) => {
-        // Trigger activates when it moves above the viewport top
-        const shouldActivate = entry.boundingClientRect.top <= 0 && !entry.isIntersecting;
-        if (shouldActivate && !isClassActive) {
-            requestAnimationFrame(() => {
-                targetElement.classList.add(activeClass);
-                isClassActive = true;
-            });
-        }
-        if (!shouldActivate && isClassActive) {
-            requestAnimationFrame(() => {
-                targetElement.classList.remove(activeClass);
-                isClassActive = false;
-            });
-        }
-    }, {
-        root,
-        threshold: 0,
-        rootMargin,
-    });
-    observer.observe(triggerElement);
-    return () => observer.disconnect();
+export function toggleClassOnIntersection(
+  targetElement,
+  triggerElement,
+  activeClass,
+  root = null,
+  rootMargin = '-1px 0px 0px 0px',
+) {
+  if (!targetElement.isConnected || !triggerElement.isConnected) {
+    throw new Error(
+      '[toggleClassOnIntersection]: targetElement or triggerElement is not connected to the DOM.',
+    );
+  }
+  let isClassActive = false;
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      // Trigger activates when it moves above the viewport top
+      const shouldActivate = entry.boundingClientRect.top <= 0 && !entry.isIntersecting;
+      if (shouldActivate && !isClassActive) {
+        requestAnimationFrame(() => {
+          targetElement.classList.add(activeClass);
+          isClassActive = true;
+        });
+      }
+      if (!shouldActivate && isClassActive) {
+        requestAnimationFrame(() => {
+          targetElement.classList.remove(activeClass);
+          isClassActive = false;
+        });
+      }
+    },
+    {
+      root,
+      threshold: 0,
+      rootMargin,
+    },
+  );
+  observer.observe(triggerElement);
+  return () => observer.disconnect();
 }
 /**
  * Observes visibility changes of a DOM element using IntersectionObserver.
@@ -142,35 +158,46 @@ export function toggleClassOnIntersection(targetElement, triggerElement, activeC
  * });
  */
 export function observeIntersection(targetElement, options = {}) {
-    const { root = null, rootMargin = '0px', threshold = 0, once = false, onEnter, onLeave, onChange, } = options;
-    if (!targetElement.isConnected) {
-        throw new Error('[observeIntersection]: targetElement is not connected to the DOM.');
-    }
-    let wasIntersecting = false;
-    const observer = new IntersectionObserver(([entry]) => {
-        const isIntersecting = entry.isIntersecting;
-        // Generic state change callback
-        onChange?.(entry);
-        // Element entered viewport
-        if (isIntersecting && !wasIntersecting) {
-            onEnter?.(entry);
-            if (once) {
-                observer.disconnect();
-                return;
-            }
+  const {
+    root = null,
+    rootMargin = '0px',
+    threshold = 0,
+    once = false,
+    onEnter,
+    onLeave,
+    onChange,
+  } = options;
+  if (!targetElement.isConnected) {
+    throw new Error('[observeIntersection]: targetElement is not connected to the DOM.');
+  }
+  let wasIntersecting = false;
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      const isIntersecting = entry.isIntersecting;
+      // Generic state change callback
+      onChange?.(entry);
+      // Element entered viewport
+      if (isIntersecting && !wasIntersecting) {
+        onEnter?.(entry);
+        if (once) {
+          observer.disconnect();
+          return;
         }
-        // Element left viewport
-        if (!isIntersecting && wasIntersecting) {
-            onLeave?.(entry);
-        }
-        wasIntersecting = isIntersecting;
-    }, {
-        root,
-        rootMargin,
-        threshold,
-    });
-    observer.observe(targetElement);
-    return () => observer.disconnect();
+      }
+      // Element left viewport
+      if (!isIntersecting && wasIntersecting) {
+        onLeave?.(entry);
+      }
+      wasIntersecting = isIntersecting;
+    },
+    {
+      root,
+      rootMargin,
+      threshold,
+    },
+  );
+  observer.observe(targetElement);
+  return () => observer.disconnect();
 }
 /**
  * Observes one or multiple elements using shared IntersectionObserver instances.
@@ -348,18 +375,18 @@ export function observeIntersection(targetElement, options = {}) {
  * });
  */
 export function observeIntersections(elements, options) {
-    const { root = null, rootMargin = '0px', threshold = 0 } = options;
-    const key = createObserverKey(root, rootMargin, threshold);
-    let observer = observerCache.get(key);
-    if (!observer) {
-        observer = createObserver(key, root, rootMargin, threshold);
-        observerCache.set(key, observer);
-    }
-    const list = Array.isArray(elements) ? elements : [elements];
-    const cleanups = [];
-    for (const el of list) {
-        cleanups.push(registerElement(observer, el, options));
-    }
-    return cleanups;
+  const { root = null, rootMargin = '0px', threshold = 0 } = options;
+  const key = createObserverKey(root, rootMargin, threshold);
+  let observer = observerCache.get(key);
+  if (!observer) {
+    observer = createObserver(key, root, rootMargin, threshold);
+    observerCache.set(key, observer);
+  }
+  const list = Array.isArray(elements) ? elements : [elements];
+  const cleanups = [];
+  for (const el of list) {
+    cleanups.push(registerElement(observer, el, options));
+  }
+  return cleanups;
 }
 //# sourceMappingURL=index.js.map

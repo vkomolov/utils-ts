@@ -1,11 +1,18 @@
 import {
+  cancelPendingFrame,
+  createLockStyles,
   createObserver,
   createObserverKey,
+  createUnlockStyles,
   observerCache,
   registerElement,
 } from '../../helpers';
-import type { TEventMap, ObserveIntersectionOptions } from '../../types';
-
+import type {
+  TEventMap,
+  ObserveIntersectionOptions,
+  ScrollLockController,
+  ScrollLockState,
+} from '../../types';
 
 /**
  * It checks whether the given style rule is supported for the given HTML Element
@@ -452,4 +459,102 @@ export function observeIntersections(
   }
 
   return cleanups;
+}
+
+const INITIAL_SCROLL_LOCK_STATE: ScrollLockState = {
+  rafId: null,
+  isLocked: false,
+  originalPaddingRight: '',
+  scrollbarWidth: 0,
+  isInitialized: false,
+};
+
+/**
+ * Creates a scroll lock controller with encapsulated state
+ *
+ * @description
+ * When the scroll container switches to overflow: hidden,
+ * the function replaces the width of the hidden scrollbar with the same
+ * width of the right padding to avoid layout shift of page elements.
+ *
+ * @returns {ScrollLockController} Object with lockScroll and destroy methods
+ *
+ * @example
+ * // Initialize controller
+ * const scrollLocker = initLockScroll();
+ *
+ * // Lock scroll (adds padding compensation for scrollbar width)
+ * scrollLocker.lockScroll(true);
+ *
+ * // Unlock scroll (restores original padding)
+ * scrollLocker.lockScroll(false);
+ *
+ * // Cleanup when component unmounts
+ * scrollLocker.destroy();
+ */
+export function initLockScroll(): ScrollLockController {
+  // Direct state initialization - no factory function needed
+  const state: ScrollLockState = { ...INITIAL_SCROLL_LOCK_STATE };
+
+  /**
+   * Applies style object to document.body
+   */
+  const applyStyles = (styles: { overflow: string; paddingRight: string }): void => {
+    document.body.style.overflow = styles.overflow;
+    document.body.style.paddingRight = styles.paddingRight;
+  };
+
+  /**
+   * Applies scroll lock with compensation
+   */
+  const executeLock = (): void => {
+    // Lazy calculation and caching of scrollbar width
+    if (!state.scrollbarWidth) {
+      state.scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    }
+
+    // Preserve original styles only on first execution
+    if (!state.isInitialized) {
+      state.originalPaddingRight = document.body.style.paddingRight;
+      state.isInitialized = true;
+    }
+
+    applyStyles(createLockStyles(state.scrollbarWidth, state.originalPaddingRight));
+    state.rafId = null; // RAF completed
+  };
+
+  /**
+   * Removes scroll lock and restores original styles
+   */
+  const executeUnlock = (): void => {
+    applyStyles(createUnlockStyles(state.originalPaddingRight));
+    state.rafId = null; // RAF completed
+  };
+
+  /**
+   * Locks or unlocks page scroll
+   */
+  const lockScroll = (lock: boolean = true): void => {
+    if (state.isLocked === lock) return; // Skip if no change
+
+    state.rafId = cancelPendingFrame(state.rafId);
+    state.isLocked = lock;
+    state.rafId = requestAnimationFrame(lock ? executeLock : executeUnlock);
+  };
+
+  /**
+   * Cleanup function for component unmounting
+   */
+  const destroy = (): void => {
+    state.rafId = cancelPendingFrame(state.rafId);
+
+    if (state.isInitialized && state.isLocked) {
+      executeUnlock();
+    }
+
+    // Explicit reset
+    Object.assign(state, INITIAL_SCROLL_LOCK_STATE);
+  };
+
+  return { lockScroll, destroy };
 }

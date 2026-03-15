@@ -17,5 +17,8 @@ export declare function isSafeObject(value: unknown): value is Record<string, un
  *
  * @returns A new object with the specified keys removed.
  */
-export declare function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K>;
+export declare function omit<T extends object, K extends keyof T>(
+  obj: T,
+  keys: K[],
+): Omit<T, K>;
 //# sourceMappingURL=index.d.ts.map

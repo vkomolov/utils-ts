@@ -115,3 +115,37 @@ export function registerElement(
 
   return callbacks.cleanup;
 }
+
+/*** SCROLL LOCKER ***/
+
+/**
+ * Creates lock style updates
+ * Pure function - returns style changes without applying them
+ */
+export const createLockStyles = (
+  scrollbarWidth: number,
+  originalPadding: string,
+): { overflow: string; paddingRight: string } => ({
+  overflow: 'hidden',
+  paddingRight: scrollbarWidth > 0 ? `${scrollbarWidth}px` : originalPadding,
+});
+
+/**
+ * Creates unlock style updates
+ * Pure function - returns restoration values
+ */
+export const createUnlockStyles = (
+  originalPadding: string,
+): { overflow: string; paddingRight: string } => ({
+  overflow: '',
+  paddingRight: originalPadding,
+});
+
+/**
+ * Cancels pending animation frame if exists
+ * @returns {null} always null for state reset
+ */
+export const cancelPendingFrame = (rafId: number | null): null => {
+  if (rafId !== null) cancelAnimationFrame(rafId);
+  return null;
+};

@@ -28,3 +28,38 @@ export interface SharedObserver extends IntersectionObserver {
   _elementCount: number;
   _key: string;
 }
+
+/**
+ * State interface for scroll lock controller
+ * @interface
+ */
+export interface ScrollLockState {
+  /** Animation frame ID for cancellation */
+  rafId: number | null;
+  /** Current lock status */
+  isLocked: boolean;
+  /** Original padding-right value before lock */
+  originalPaddingRight: string;
+  /** Cached scrollbar width */
+  scrollbarWidth: number;
+  /** Flag indicating if controller was ever used */
+  isInitialized: boolean;
+}
+
+/**
+ * Return type for initLockScroll factory
+ * @interface
+ */
+export interface ScrollLockController {
+  /**
+   * Locks or unlocks page scroll with scrollbar width compensation
+   * @param lock - true to lock scroll, false to unlock
+   */
+  lockScroll(lock?: boolean): void;
+
+  /**
+   * Destroys controller and restores original state
+   * Call this when unmounting component to prevent memory leaks
+   */
+  destroy(): void;
+}
