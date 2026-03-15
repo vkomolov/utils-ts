@@ -1,10 +1,13 @@
 {
-	"extends": "./tsconfig.json",
-	"compilerOptions": {
-		"noEmit": false,
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"declaration": true,
-		"sourceMap": true
-	}
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "removeComments": false
+  },
+  "include": ["src"]
 }

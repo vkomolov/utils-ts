@@ -1,92 +1,89 @@
-import js from "@eslint/js"
-import globals from "globals"
+import js from '@eslint/js';
+import globals from 'globals';
 
-import tsParser from "@typescript-eslint/parser"
-import tsPlugin from "@typescript-eslint/eslint-plugin"
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 
-import importPlugin from "eslint-plugin-import"
-import unusedImports from "eslint-plugin-unused-imports"
+import importPlugin from 'eslint-plugin-import';
+import unusedImports from 'eslint-plugin-unused-imports';
 
-import prettierPlugin from "eslint-plugin-prettier"
-import prettierConfig from "eslint-config-prettier"
+import prettierConfig from 'eslint-config-prettier';
 
 export default [
-	js.configs.recommended,
+  js.configs.recommended,
 
-	{
-		files: ["**/*.{js,ts}"],
+  {
+    files: ['**/*.{ts,js}'],
 
-		languageOptions: {
-			parser: tsParser,
+    languageOptions: {
+      parser: tsParser,
 
-			parserOptions: {
-				ecmaVersion: "latest",
-				sourceType: "module"
-			},
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
 
-			globals: {
-				...globals.browser,
-				...globals.node
-			}
-		},
+      globals: {
+        ...globals.node,
+      },
+    },
 
-		plugins: {
-			"@typescript-eslint": tsPlugin,
-			import: importPlugin,
-			"unused-imports": unusedImports,
-			prettier: prettierPlugin
-		},
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      import: importPlugin,
+      'unused-imports': unusedImports,
+    },
 
-		rules: {
-			// TypeScript
-			...tsPlugin.configs.recommended.rules,
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
+    },
 
-			// Import hygiene
-			"import/order": [
-				"warn",
-				{
-					groups: ["builtin", "external", "internal"],
-					"newlines-between": "always"
-				}
-			],
+    rules: {
+      /* TypeScript */
+      ...tsPlugin.configs.recommended.rules,
 
-			// Remove unused imports automatically
-			"unused-imports/no-unused-imports": "warn",
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        { prefer: 'type-imports' },
+      ],
 
-			"unused-imports/no-unused-vars": [
-				"warn",
-				{
-					vars: "all",
-					varsIgnorePattern: "^_",
-					args: "after-used",
-					argsIgnorePattern: "^_"
-				}
-			],
+      '@typescript-eslint/no-unused-vars': 'off',
 
-			// Disable base rule because TS handles it
-			"no-unused-vars": "off",
+      /* disable JS no-undef because TS handles it */
+      'no-undef': 'off',
 
-			"import/no-duplicates": "off",
-			"import/no-unresolved": "error",
-			"@typescript-eslint/consistent-type-imports": "warn",
-			//To import TS types via import type { User } from "./types"
+      /* Imports */
+      'import/no-unresolved': 'error',
+      'import/no-duplicates': 'warn',
+      'import/order': [
+        'warn',
+        {
+          groups: ['builtin','external','internal',['parent','sibling','index']],
+          'newlines-between': 'always',
+          alphabetize: { order:'asc', caseInsensitive:true },
+        },
+      ],
 
-			// Prettier integration
-			"prettier/prettier": "warn"
-		}
-	},
+      /* Unused imports */
+      'unused-imports/no-unused-imports': 'warn',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        { vars:'all', varsIgnorePattern:'^_', args:'after-used', argsIgnorePattern:'^_' },
+      ],
 
-	prettierConfig,
+      /* Quality */
+      'no-debugger': 'warn',
+      'no-console': 'off',
+    },
+  },
 
-	{
-		ignores: [
-			"node_modules/**",
-			"dist/**",
-			"build/**",
-			".vscode/**",
-			".idea/**",
-			"docs/**",
-			"scripts/**"
-		]
-	}
-]
+  prettierConfig,
+
+  {
+    ignores: ['node_modules', 'dist', 'coverage', '.idea', '.vscode'],
+  },
+];
