@@ -12,8 +12,20 @@ import type {
   ObserveIntersectionOptions,
   ScrollLockController,
   ScrollLockState,
+  ImageDimensions
 } from '../../types';
 
+/// END OF IMPORTS ///
+
+const INITIAL_SCROLL_LOCK_STATE: ScrollLockState = {
+  rafId: null,
+  isLocked: false,
+  originalPaddingRight: '',
+  scrollbarWidth: 0,
+  isInitialized: false,
+};
+
+//////////////////////
 /**
  * It checks whether the given style rule is supported for the given HTML Element
  * @param element - target HTML Element
@@ -44,7 +56,7 @@ export function migrateElement({
   parentFrom,
   parentTo,
 }: TMigrateElementParams): void {
-  if (target.isConnected) {
+  if (target?.isConnected) {
     (target.parentElement === parentFrom ? parentTo : parentFrom).appendChild(target);
   } else {
     console.warn(`[migrateElement]: target: ${target} in not in DOM...`);
@@ -461,14 +473,6 @@ export function observeIntersections(
   return cleanups;
 }
 
-const INITIAL_SCROLL_LOCK_STATE: ScrollLockState = {
-  rafId: null,
-  isLocked: false,
-  originalPaddingRight: '',
-  scrollbarWidth: 0,
-  isInitialized: false,
-};
-
 /**
  * Creates a scroll lock controller with encapsulated state
  *
@@ -557,4 +561,127 @@ export function initLockScroll(): ScrollLockController {
   };
 
   return { lockScroll, destroy };
+}
+
+/**
+ * Extracts dimension information from a loaded image
+ * @param img - The image element
+ * @returns Dimension data object
+ */
+function extractDimensions(img: HTMLImageElement): ImageDimensions {
+  return {
+    naturalWidth: img.naturalWidth,
+    naturalHeight: img.naturalHeight,
+    offsetWidth: img.offsetWidth,
+    offsetHeight: img.offsetHeight,
+  };
+}
+
+/**
+ * Waits for image dimensions to be available
+ * Handles cached images that already have dimensions
+ *
+ * @param img - Image to check
+ * @returns Resolves with dimensions or null on error
+ *
+ * @sample Checking image size before displaying:
+ * const img = document.querySelector('img')!;
+ *
+ * getImageDimensions(img).then((size) => {
+ *   if (!size) return;
+ *
+ *   if (size.naturalWidth < 300) {
+ *     img.style.display = 'none';
+ *     console.log('Image too small');
+ *   }
+ * });
+ *
+ * @sample Automatic aspect ratio calculation
+ * const img = document.querySelector('img')!;
+ *
+ * getImageDimensions(img).then((size) => {
+ *   if (!size) return;
+ *
+ *   const ratio = size.naturalWidth / size.naturalHeight;
+ *
+ *   console.log('Aspect ratio:', ratio);
+ *
+ *   // for example, to give container padding-bottom
+ *   const container = img.parentElement!;
+ *   container.style.paddingBottom = `${100 / ratio}%`;
+ * });
+ *
+ * @sample Centering/Adjusting the Image Display
+ * getImageDimensions(img).then((size) => {
+ *   if (!size) return;
+ *
+ *   if (size.naturalWidth > size.offsetWidth) {
+ *     img.style.objectFit = 'cover';
+ *   } else {
+ *     img.style.objectFit = 'contain';
+ *   }
+ * });
+ *
+ * @sample Lazy loading + pre-load layout calculation
+ * const img = new Image();
+ * img.src = 'image.jpg';
+ *
+ * getImageDimensions(img).then((size) => {
+ *   if (!size) return;
+ *
+ *   const wrapper = document.createElement('div');
+ *   wrapper.style.width = '100%';
+ *   wrapper.style.aspectRatio = `${size.naturalWidth} / ${size.naturalHeight}`;
+ *
+ *   wrapper.appendChild(img);
+ *   document.body.appendChild(wrapper);
+ * });
+ *
+ * @sample Validation before loading (e.g. preview)
+ * const input = document.querySelector('input[type="file"]')!;
+ *
+ * input.addEventListener('change', () => {
+ *   const file = input.files?.[0];
+ *   if (!file) return;
+ *
+ *   const img = new Image();
+ *   img.src = URL.createObjectURL(file);
+ *
+ *   getImageDimensions(img).then((size) => {
+ *     if (!size) return;
+ *
+ *     if (size.naturalWidth < 800) {
+ *       alert('Image must be at least 800px wide');
+ *     }
+ *   });
+ * });
+ *
+ *
+ */
+function getImageDimensions(img: HTMLImageElement): Promise<ImageDimensions | null> {
+  return new Promise((resolve) => {
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      resolve(extractDimensions(img));
+      return;
+    }
+
+    const cleanup = () => {
+      img.removeEventListener('load', handleLoad);
+      img.removeEventListener('error', handleError);
+    };
+
+    const handleLoad = () => {
+      cleanup();
+      resolve(extractDimensions(img));
+    };
+
+    const handleError = () => {
+      cleanup();
+      console.warn(`[getImageDimensions]: could not load the image with src: ${img.src}`);
+      resolve(null);
+    };
+
+    img.addEventListener('load', handleLoad);
+    img.addEventListener('error', handleError);
+  });
 }
